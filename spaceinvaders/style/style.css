@@ -1,0 +1,39 @@
+#info {
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 800px;
+ margin-left:10px;
+ color:white;
+ height: 23px;
+ font-family:'Courier New';
+}
+
+#lives {
+ margin-left:15px;
+}
+
+#game {
+ z-index:1000;
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 800px;
+ height: 523px;
+}
+
+.pause {
+    left: 0;
+    text-align:right;
+    float:right;
+    text-align: right;
+}
+
+body {
+    background-color: black;
+}
+
+canvas {
+    position:absolute;
+    top:23px;
+}
