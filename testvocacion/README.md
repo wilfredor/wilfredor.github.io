@@ -1,2 +1,0 @@
-# testvocacion
-Spanish test vocacional
