@@ -1235,6 +1235,126 @@ else {}
 
 /***/ }),
 
+/***/ 423:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Area = void 0;
+var pt_json_1 = __importDefault(__webpack_require__(82));
+var question_1 = __webpack_require__(967);
+var relations_1 = __importDefault(__webpack_require__(432));
+var Area = /** @class */ (function () {
+    function Area(id, lang) {
+        this._lang = pt_json_1.default;
+        this._id = id;
+        this._lang = lang;
+    }
+    Object.defineProperty(Area.prototype, "porcent", {
+        get: function () {
+            return this._porcent;
+        },
+        set: function (porcent) {
+            this._porcent = porcent;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Area.prototype, "id", {
+        get: function () {
+            return this.id;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Area.prototype, "description", {
+        get: function () {
+            var _this = this;
+            return this._lang.areas.filter(function (area) { return area.id === _this._id; })[0].description;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Area.prototype, "carreras", {
+        get: function () {
+            return this._lang.carreras[this._id - 1].description;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Area.prototype, "questions", {
+        get: function () {
+            var _this = this;
+            var questions = [];
+            var questionsIds = relations_1.default.questionsInAreas().filter(function (relation) { return relation.areaId === _this._id; })[0].questionsId;
+            questionsIds.forEach(function (questionId) {
+                questions.push(new question_1.Question(questionId, _this._lang));
+            });
+            return questions;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Area;
+}());
+exports.Area = Area;
+
+
+/***/ }),
+
+/***/ 967:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Question = void 0;
+var area_1 = __webpack_require__(423);
+var pt_json_1 = __importDefault(__webpack_require__(82));
+var relations_1 = __importDefault(__webpack_require__(432));
+var Question = /** @class */ (function () {
+    function Question(id, lang) {
+        this._lang = pt_json_1.default;
+        this._id = id;
+        this._lang = lang;
+    }
+    Object.defineProperty(Question.prototype, "id", {
+        get: function () {
+            return this.id;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Question.prototype, "description", {
+        get: function () {
+            var _this = this;
+            return this._lang.questions.filter(function (question) { return question.id === _this._id; })[0].description;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Question.prototype, "area", {
+        get: function () {
+            var _this = this;
+            return new area_1.Area(relations_1.default.questionsInAreas().filter(function (relation) { return relation.questionsId.includes(_this._id); })[0].areaId, this._lang);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Question;
+}());
+exports.Question = Question;
+
+
+/***/ }),
+
 /***/ 9:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -1281,90 +1401,60 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var cash_dom_1 = __importDefault(__webpack_require__(553));
+var table_1 = __importDefault(__webpack_require__(900));
 var pt_json_1 = __importDefault(__webpack_require__(82));
 var es_json_1 = __importDefault(__webpack_require__(905));
+var en_json_1 = __importDefault(__webpack_require__(7));
+var relations_1 = __importDefault(__webpack_require__(432));
+var question_1 = __webpack_require__(967);
+var area_1 = __webpack_require__(423);
 var lang = pt_json_1.default;
-var area1 = [4, 9, 12, 20, 28, 31, 35, 39, 43, 46, 50, 65, 67, 68, 75, 77];
-var area2 = [6, 13, 23, 25, 34, 37, 38, 42, 49, 52, 55, 63, 66, 70, 72, 78];
-var area3 = [5, 10, 15, 19, 21, 26, 29, 33, 36, 44, 53, 56, 59, 62, 71, 80];
-var area4 = [1, 7, 11, 17, 18, 24, 30, 41, 48, 51, 58, 60, 61, 64, 73, 79];
-var area5 = [2, 3, 8, 14, 16, 22, 27, 32, 40, 45, 47, 54, 57, 69, 74, 76];
-var a1 = 0;
-var a2 = 0;
-var a3 = 0;
-var a4 = 0;
-var a5 = 0;
-function areas(questions_size) {
-    for (var i = 0; i <= questions_size - 1; i++) {
-        var questionCheckbox = (0, cash_dom_1.default)("input[name=\"preguntas".concat(i, "\"]"));
-        if (questionCheckbox.is(':checked')) {
-            if (area1.includes(i + 1))
-                a1++;
-            else if (area2.includes(i + 1))
-                a2++;
-            else if (area3.includes(i + 1))
-                a3++;
-            else if (area4.includes(i + 1))
-                a4++;
-            else if (area5.includes(i + 1))
-                a5++;
+function areasCount() {
+    var areasCount = [0, 0, 0, 0, 0];
+    var questionCheckboxes = Array.from(document.querySelectorAll('input[name^="question"]'));
+    questionCheckboxes.forEach(function (checkbox, i) {
+        if ((0, cash_dom_1.default)(checkbox).is(":checked")) {
+            relations_1.default.questionsInAreas().forEach(function (area, j) {
+                if (area.questionsId.includes(i + 1)) {
+                    areasCount[j]++;
+                }
+            });
         }
-    }
+    });
+    return areasCount;
 }
-function porcent(x) {
-    return Math.floor((x * 100) / (a1 + a2 + a3 + a4 + a5));
+function porcent(x, area) {
+    var sum = area.reduce(function (a, b) { return a + b; }, 0);
+    return Math.floor((x * 100) / sum);
 }
 function process() {
     if (radios_ok(lang.questions.length)) {
-        areas(lang.questions.length);
-        writeAreas([porcent(a1), porcent(a2), porcent(a3), porcent(a4), porcent(a5)]);
+        var counts_1 = areasCount();
+        var porcents = counts_1.map(function (areaCount) { return porcent(areaCount, counts_1); });
+        writeAreas(porcents);
     }
 }
 function radios_ok(questions_size) {
     for (var i = 0; i <= questions_size - 1; i++) {
-        var radiogroup = document.getElementsByName('preguntas' + i);
+        var radiogroup = document.getElementsByName("question".concat(i));
         var check_yes = radiogroup[0];
         var check_not = radiogroup[1];
-        if (!((check_yes.checked) || (check_not.checked))) {
+        if (!(check_yes.checked || check_not.checked)) {
             check_yes.focus();
-            alert('Debe responder todas las preguntas, falta: ' + Number(i + 1));
+            check_yes.parentElement.parentElement.style.background = 'lightcoral';
+            alert("".concat(lang.labels.AllQuestionsNeedToBeAnswered, " ").concat(i + 1));
             return false;
         }
     }
     return true;
 }
-function randownchecked() {
-    return (Math.floor(Math.random() * 2));
-}
-function createRadio(i) {
-    var radio = document.createElement("input");
-    radio.type = 'radio';
-    radio.name = "preguntas".concat((i));
-    radio.checked = (Math.random() < 0.7);
-    return radio;
-}
-function setQuestions(langQuestions) {
+function setQuestions(lang) {
     var questions = document.querySelectorAll('tr:not(:first-child) td:nth-child(2)');
+    document.getElementById('Activity').innerHTML = lang.labels.Activity;
     questions.forEach(function (q, i) {
-        q.innerHTML = langQuestions[i];
+        var question = new question_1.Question(i + 1, lang);
+        q.innerHTML = question.description;
     });
-}
-function addRow(i) {
-    var newRow = document.createElement("tr");
-    var newCol1 = document.createElement("td");
-    var newCol2 = document.createElement("td");
-    var newCol3 = document.createElement("td");
-    var newCol4 = document.createElement("td");
-    var numero = document.createTextNode(String(i + 1));
-    newCol1.appendChild(numero);
-    newCol2.appendChild(document.createTextNode(("")));
-    newCol3.appendChild(createRadio(i));
-    newCol4.appendChild(createRadio(i));
-    newRow.appendChild(newCol1);
-    newRow.appendChild(newCol2);
-    newRow.appendChild(newCol3);
-    newRow.appendChild(newCol4);
-    (0, cash_dom_1.default)("#table > tbody")[0].appendChild(newRow);
 }
 function writeQuestions() {
     (0, cash_dom_1.default)("#btn_procesar").on('click', function () { return process(); });
@@ -1375,24 +1465,33 @@ function writeQuestions() {
                     lang = es_json_1.default;
                 else if ((0, cash_dom_1.default)('#lang').val() === "pt")
                     lang = pt_json_1.default;
-                setQuestions(lang.questions);
+                else if ((0, cash_dom_1.default)('#lang').val() === "en")
+                    lang = en_json_1.default;
+                setQuestions(lang);
                 return [2 /*return*/];
             });
         });
     });
-    lang.questions.forEach(function (q, i) { return addRow(i); });
-    setQuestions(lang.questions);
+    lang.questions.forEach(function (q, i) { return table_1.default.addRow(i); });
+    setQuestions(lang);
 }
 function writeAreas(areasPorcent) {
     var results = document.getElementsByClassName('areas')[0];
-    for (var i = 0; i <= 4; i++) {
+    var areas = [];
+    for (var i = 1; i < lang.areas.length; i++) {
+        var area = new area_1.Area(i, lang);
+        area.porcent = areasPorcent[i];
+        areas.push(area);
+    }
+    areas.sort(function (a, b) { return (b.porcent > a.porcent) ? 1 : -1; });
+    areas.forEach(function (area) {
         var h1 = document.createElement('h1');
         var p = document.createElement('p');
-        h1.innerText = "".concat(lang.areasEstudio[i], " ").concat(areasPorcent[i], " %");
-        p.innerText = lang.carreras[i];
+        h1.innerText = "".concat(area.description, " ").concat(area.porcent, " %");
+        p.innerText = area.carreras;
         results.appendChild(h1);
         results.appendChild(p);
-    }
+    });
     var table = document.getElementsByTagName("table")[0];
     table.innerHTML = "";
     var button = document.getElementById("btn_procesar");
@@ -1403,11 +1502,96 @@ window.onload = writeQuestions;
 
 /***/ }),
 
+/***/ 432:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var Relations = /** @class */ (function () {
+    function Relations() {
+    }
+    Relations.questionsInAreas = function () {
+        return [
+            { "areaId": 1, "questionsId": [4, 9, 12, 20, 28, 31, 35, 39, 43, 46, 50, 65, 67, 68, 75, 77] },
+            { "areaId": 2, "questionsId": [6, 13, 23, 25, 34, 37, 38, 42, 49, 52, 55, 63, 66, 70, 72, 78] },
+            { "areaId": 3, "questionsId": [5, 10, 15, 19, 21, 26, 29, 33, 36, 44, 53, 56, 59, 62, 71, 80] },
+            { "areaId": 4, "questionsId": [1, 7, 11, 17, 18, 24, 30, 41, 48, 51, 58, 60, 61, 64, 73, 79] },
+            { "areaId": 5, "questionsId": [2, 3, 8, 14, 16, 22, 27, 32, 40, 45, 47, 54, 57, 69, 74, 76] }
+        ];
+    };
+    return Relations;
+}());
+exports["default"] = Relations;
+
+
+/***/ }),
+
+/***/ 900:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var Table = /** @class */ (function () {
+    function Table() {
+    }
+    Table.addRow = function (i) {
+        var _this = this;
+        var _a;
+        var tbody = (_a = document.getElementById("table")) === null || _a === void 0 ? void 0 : _a.getElementsByTagName("tbody")[0];
+        if (!tbody)
+            return;
+        var tr = document.createElement("tr");
+        var cells = [
+            i + 1,
+            '',
+            Table.createRadio(i),
+            Table.createRadio(i)
+        ];
+        cells.forEach(function (cell) {
+            var td = document.createElement("td");
+            _this.addCellContent(cell, td);
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    };
+    Table.addCellContent = function (cell, td) {
+        if (cell instanceof HTMLInputElement) {
+            td.appendChild(cell);
+        }
+        else {
+            td.textContent = cell.toString();
+        }
+    };
+    ;
+    Table.createRadio = function (i) {
+        var radio = document.createElement("input");
+        radio.type = 'radio';
+        radio.name = "question".concat((i));
+        radio.checked = true;
+        return radio;
+    };
+    return Table;
+}());
+exports["default"] = Table;
+
+
+/***/ }),
+
+/***/ 7:
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"questions":[{"id":1,"description":"Design computer programs and explore new technology applications for internet use."},{"id":2,"description":"Raise, care for, and treat domestic and field animals."},{"id":3,"description":"Research green areas, the environment, and climate change."},{"id":4,"description":"Illustrate, draw, and digitally animate."},{"id":5,"description":"Select, train, and motivate an organization/company\'s personnel."},{"id":6,"description":"Conduct excavations to discover past remains."},{"id":7,"description":"Solve calculus problems to build structures."},{"id":8,"description":"Design courses to teach people about health and hygiene topics."},{"id":9,"description":"Play an instrument, compose music, and be part of a musical group or orchestra."},{"id":10,"description":"Plan medium and long-term goals for a public or private organization."},{"id":11,"description":"Design and plan the mass production of items such as furniture, cars, office equipment, food packaging and others."},{"id":12,"description":"Design logos and magazine covers."},{"id":13,"description":"Organize events and attend to attendees."},{"id":14,"description":"Take care of the health of sick people."},{"id":15,"description":"Control income and expenses of funds and present the final balance of an institution."},{"id":16,"description":"Conduct experiments with plants (fruits, trees, flowers)"},{"id":17,"description":"Conceive plans for housing, buildings, and fortifications."},{"id":18,"description":"Research and test new pharmaceutical products."},{"id":19,"description":"Make proposals and formulate strategies to take advantage of economic relationships between two countries."},{"id":20,"description":"Paint, make sculptures, illustrate art books, etc."},{"id":21,"description":"Develop campaigns to introduce a new product to the market."},{"id":22,"description":"Examine and treat visual problems."},{"id":23,"description":"Defend individual clients or companies in various legal proceedings."},{"id":24,"description":"Design machines that can simulate human activities."},{"id":25,"description":"Investigate the causes and effects of emotional disorders."},{"id":26,"description":"Supervise sales at a shopping center."},{"id":27,"description":"Attend and perform exercises for people with physical limitations, language problems, etc."},{"id":28,"description":"Prepare to become a professional model."},{"id":29,"description":"Advise people on saving and investment plans."},{"id":30,"description":"Develop maps, plans, and images for the study and analysis of geographic data."},{"id":31,"description":"Design interactive electronic computer games."},{"id":32,"description":"Perform food quality control."},{"id":33,"description":"Own a commercial type of business."},{"id":34,"description":"Analyze political phenomena and actively participate in them."},{"id":35,"description":"Write television scripts, stories, novels, and journalistic articles."},{"id":36,"description":"Organize a distribution and sales plan for a large store."},{"id":37,"description":"Study the customs and way of life of rural and urban communities."},{"id":38,"description":"Manage and evaluate international cooperation agreements for social development."},{"id":39,"description":"Conduct advertising campaigns for products and services."},{"id":40,"description":"Work researching the reproduction of fish, shrimp, and other marine animals."},{"id":41,"description":"Manufacture food products for mass consumption."},{"id":42,"description":"Manage and evaluate development projects in an educational institution and/or foundation."},{"id":43,"description":"Redesign and decorate physical spaces in homes, offices, and commercial locations."},{"id":44,"description":"Manage a tourism company and/or travel agencies."},{"id":45,"description":"Apply alternative methods to traditional medicine to treat people with various ailments."},{"id":46,"description":"Design clothing for children, young people, and adults."},{"id":47,"description":"Investigate living organisms to create vaccines."},{"id":48,"description":"Manage and/or maintain technology devices/appliances on airplanes, boats, radars, etc."},{"id":49,"description":"Study foreign, both current and ancient, languages for translation purposes."},{"id":50,"description":"Restore art pieces and works of art."},{"id":51,"description":"Inspect and maintain electrical, electronic, and computer artifacts."},{"id":52,"description":"Teach children aged 0 to 5 years."},{"id":53,"description":"Investigate and/or survey new markets."},{"id":54,"description":"Provide dental care to people."},{"id":55,"description":"Treat children, young people and adults with psychological problems."},{"id":56,"description":"Create promotion and sales strategies for new Ecuadorian products in the international market."},{"id":57,"description":"Plan and recommend diets for diabetic and/or overweight individuals."},{"id":58,"description":"Work in a petroleum company in technical positions."},{"id":59,"description":"Manage a company (family, private or public)."},{"id":60,"description":"Run a car, tractor, etc. repair and maintenance workshop."},{"id":61,"description":"Carry out mining and metallurgical extraction projects."},{"id":62,"description":"Assist multinational executives with multilingual management."},{"id":63,"description":"Design educational programs for children with disabilities."},{"id":64,"description":"Apply statistical knowledge in research in various fields (social, administrative, health, etc.)."},{"id":65,"description":"Photograph historical events, significant places, faces, landscapes, and various products."},{"id":66,"description":"Work in national and international museums and libraries."},{"id":67,"description":"Be part of a theater group."},{"id":68,"description":"Produce short films, advertisements, educational programs, fiction, etc."},{"id":69,"description":"Study the influence between ocean currents and climate and its ecological consequences."},{"id":70,"description":"Study a religion deeply to guide people spiritually."},{"id":71,"description":"Advise investors in the purchase of goods/stocks in national and international markets."},{"id":72,"description":"Participate in creating new laws to improve the country."},{"id":73,"description":"Explore the starry space, planets, features and components."},{"id":74,"description":"Improve facial and bodily image of people using various techniques."},{"id":75,"description":"Decorate house gardens and public parks."},{"id":76,"description":"Manage and renovate meal menus in a hotel or restaurant."},{"id":77,"description":"Work as a television presenter, radio and television announcer, cultural program animator and contest host."},{"id":78,"description":"Design and execute tourism programs."},{"id":79,"description":"Manage and properly organize the physical space occupation of cities, countries etc., using satellite images, maps."},{"id":80,"description":"Organize, plan, and manage educational centers."}],"areas":[{"id":1,"description":"ART AND CREATIVITY"},{"id":2,"description":"SOCIAL SCIENCES"},{"id":3,"description":"ECONOMIC, ADMINISTRATIVE AND FINANCIAL"},{"id":4,"description":"SCIENCE AND TECHNOLOGY"},{"id":5,"description":"ECOLOGICAL, BIOLOGICAL AND HEALTH SCIENCES"}],"carreras":[{"id":1,"description":"Graphic Design, Interior Design and Decoration, Garden Design, Fashion Design, Jewelry Design, Fine Arts (painting, sculpture, dance, theater, craftsmanship, ceramics), Advertising Drawing, Restoration and Museology, Modeling, Photography, Digital Photography, Graphic and Advertising Management, Voiceover and Advertising, Acting, Cinematography, Industrial Art, Audiovisual and Multimedia Production, Radio and Television Communication and Production, Landscape Design, Film and Video, Scenic Communication for Television."},{"id":2,"description":"Psychology in general, Social Work, Languages, International Education, History and Geography, Journalism, Digital Journalism, Law, Political Science, Sociology, Anthropology, Archaeology, Social and Development Management, Family Counseling, Communication and advertising, Educational Administration, Special Education, Psychopedagogy, Early Stimulation, Simultaneous Translation, Linguistics, Early Childhood Education, Library Science, Museology, International Relations and Diplomacy, Social Communication with a mention in Marketing and Business Management, Creative and Advertising Writing, Public Relations and Organizational Communication; Hospitality and Tourism; Theology, Priestly Institution."},{"id":3,"description":"Business Administration, Accounting, Auditing, Sales, Strategic Marketing, International Business and Management, Business Management, Financial Management, Commercial Engineering, Foreign Trade, Banking and Finance, Human Resource Management, Integrated Marketing Communications, Ecotourism and Hospitality Business Administration, Economic and Financial Sciences, Business and Political Sciences, Business Sciences, Electronic Commerce, Entrepreneurs, Management of Public Organizations (Municipalities, Ministries, etc.), Educational Center Management."},{"id":4,"description":"Computer Systems Engineering, Geology, Civil Engineering, Architecture, Electronics, Telematics, Telecommunications, Mechatronic Engineering (Robotics), Image and Sound, Mining, Oil and Metallurgy, Mechanical Engineering, Industrial Engineering, Physics, Applied Mathematics, Engineering in Statistics, Automotive Engineering, Environmental Biotechnology, Geographic Engineering, Military careers (navy, aviation, army), Coastal and Port Works Engineering, Computer Statistics, Programming and System Development, Educational Technology, Astronomy, Engineering in Geographical Sciences and Sustainable Development."},{"id":5,"description":"Biology, Biochemistry, Pharmacy, Marine Biology, Bioanalysis, Biotechnology, Environmental Sciences, Animal Husbandry, Veterinary, Nutrition and Aesthetics, Cosmetology, Dietetics and Aesthetics, Medicine, Obstetrics, Emergency Medicine, Dentistry, Nursing, Technology, Oceanography and Environmental Sciences, Medical, Agronomy, Horticulture and Fruit Growing, Food Engineering, Gastronomy, Chef, Physical Culture, Sports and Rehabilitation, Environmental Management, Environmental Engineering, Optometry, Homeopathy, Reflexology."}],"labels":{"AllQuestionsNeedToBeAnswered":"You must answer all questions, missing:","Activity":"Activity"}}');
+
+/***/ }),
+
 /***/ 905:
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"questions":["Diseñar programas de computación y explorar nuevas aplicaciones tecnológicas para uso del internet.","Criar, cuidar y tratar animales domésticos y de campo","Investigar sobre áreas verdes, medio ambiente y cambios climáticos","Ilustrar, dibujar y animar digitalmente.","Seleccionar, capacitar y motivar al personal de una organización/empresa","Realizar excavaciones para descubrir restos del pasado","Resolver problemas de cálculo para construir edificaciones.","Diseñar cursos para enseñar a la gente sobre temas de salud e higiene","Tocar un instrumento, componer música y formar parte de un conjunto musical u orquesta.","Planificar cuales son las metas de una organización pública o privada a mediano y largo plazo.","Diseñar y planificar la producción masiva de artículos como muebles, autos, equipos de oficina, empaques y envases para alimentos y otros.","Diseñar logotipos y portadas de una revista","Organizar eventos y atender a sus asistentes.","Atender la salud de personas enfermas.","Controlar ingresos y egresos de fondos y presentar el balance final de una institución","Hacer experimentos con plantas (frutas, árboles, flores)","Concebir planos para viviendas, edificios y ciudadelas.","Investigar y probar nuevos productos farmacéuticos.","Hacer propuestas y formular estrategias para aprovechar las relaciones económicas entre dos países.","Pintar, hacer esculturas, ilustrar libros de arte, etc.","Elaborar campañas para introducir un nuevo producto al mercado.","Examinar y tratar los problemas visuales","Defender a clientes individuales o empresas en juicios de diferente naturaleza.","Diseñar máquinas que puedan simular actividades humanas.","Investigar las causas y efectos de los trastornos emocionales","Supervisar las ventas de un centro comercial","Atender y realizar ejercicios a personas que tienen limitaciones físicas, problemas de lenguaje, etc.","Prepararse para ser modelo profesional.","Aconsejar a las personas sobre planes de ahorro e inversiones.","Elaborar mapas, planos e imágenes para el estudio y análisis de datos geográficos.","Diseñar juegos interactivos electrónicos para computadora.","Realizar el control de calidad de los alimentos","Tener un negocio propio de tipo comercial.","Analizar los fenómenos políticos y participar activamente en ellos.","Escribir guiones de televisión, cuentos, novelas y artículos periodísticos.","Organizar un plan de distribución y venta de un gran almacén.","Estudiar las costumbres y la forma de vida de las comunidades rurales y urbanas.","Gestionar y evaluar convenios internacionales de cooperación para el desarrollo social.","Hacer campañas publicitarias para productos y servicios","Trabajar investigando la reproducción de peces, camarones y otros animales marinos.","Fabricar productos alimenticios de consumo masivo","Gestionar y evaluar proyectos de desarrollo en una institución educativa y/o fundación.","Rediseñar y decorar espacios físicos en viviendas, oficinas y locales comerciales.","Administrar una empresa de turismo y/o agencias de viaje.","Aplicar métodos alternativos a la medicina tradicional para atender personas con dolencias de diversa índole.","Diseñar ropa para niños, jóvenes y adultos.","Investigar organismos vivos para elaborar vacunas.","Manejar y/o dar mantenimiento a dispositivos/aparatos tecnológicos en aviones, barcos, radares, etc.","Estudiar idiomas extranjeros actuales y antiguos- para hacer traducciones.","Restaurar piezas y obras de arte","Revisar y dar mantenimiento a artefactos eléctricos, electrónicos y computadoras.","Enseñar a niños de 0 a 5 años","Investigar y/o sondear nuevos mercados.","Atender la salud dental de las personas","Tratar a niños, jóvenes y adultos con problemas psicológicos.","Crear estrategias de promoción y venta de nuevos productos ecuatorianos en el mercado internacional.","Planificar y recomendar dietas para personas diabéticas y/o con sobrepeso.","Trabajar en una empresa petrolera en cargos técnicos.","Administrar una empresa (familiar, privada o pública)","Tener un taller de reparación y mantenimiento de carros, tractores, etc.","Ejecutar proyectos de extracción minera y metalúrgica.","Asistir a directivos de multinacionales con manejo de varios idiomas.","Diseñar programas educativos para niños con discapacidad.","Aplicar conocimientos de estadística en investigaciones en diversas áreas (social, administrativa, salud, etc.)","Fotografiar hechos históricos, lugares significativos, rostros, paisajes y productos varios.","Trabajar en museos y bibliotecas nacionales e internacionales.","Ser parte de un grupo de teatro.","Producir cortometrajes, spots publicitarios, programas educativos, de ficción, etc.","Estudiar la influencia entre las corrientes marinas y el clima y sus consecuencias ecológicas.","Estudiar profundamente una religión para orientar espiritualmente a las personas que lo necesiten.","Asesorar a inversionistas en la compra de bienes/acciones en mercados nacionales e internacionales.","Participar en la creación de nuevas leyes para mejorar el país.","Explorar el espacio sideral, los planetas , características y componentes.","Mejorar la imagen facial y corporal de las personas aplicando diferentes técnicas.","Decorar jardines de casas y parques públicos.","Administrar y renovar menúes de comidas en un hotel o restaurante.","Trabajar como presentador de televisión, locutor de radio y televisión, animador de programas culturales y concursos.","Diseñar y ejecutar programas de turismo.","Administrar y ordenar adecuadamente la ocupación del espacio físico de ciudades, países etc., utilizando imágenes de satélite, mapas.","Organizar, planificar y administrar centros educativos"],"areasEstudio":["ARTE Y CREATIVIDAD","CIENCIAS SOCIALES","ECONOMICA, ADMINISTRATIVA Y FINANCIERA","CIENCIA Y TECNOLOGÍA","CIENCIAS ECOLÓGICAS, BIOLÓGICAS Y DE LA SALUD"],"carreras":["Diseño Gráfico, Diseño y Decoración de Interiores, Diseño de Jardines, Diseño de Modas, Diseño de Joyas, Artes Plásticas (pintura, escultura, danza, teatro, artesanía, cerámica),  Dibujo Publicitario, Restauración y museología, modelaje, fotografía, Fotografía Digital,  gestión gráfica y publicitaria, locución y publicidad, actuación, Camarografía, Arte Industrial, Producción Audiovisual y Multimedia, Comunicación y Producción en Radio y Televisión, Diseño del Paisaje,  Cine y Video, Comunicación escénica para televisión.","Psicología en general, Trabajo Social, Idiomas, Educación  Internacional,  Historia y Geografía, Periodismo, Periodismo Digital, Derecho, Ciencias Políticas, Sociología, Antropología, Arqueología,  Gestión Social y Desarrollo, Consejería Familiar, Comunicación y publicidad, Administración educativa, Educación Especial, Psicopedagogía, Estimulación Temprana,  Traducción Simultánea, Lingüística, Educación de Párvulos, Bibliotecología, Museología, Relaciones Internacionales y Diplomacia, Comunicación Social con mención en Marketing y Gestión de Empresas, Redacción Creativa y Publicitaria,  Relaciones Públicas y Comunicación Organizacional; Hotelería y Turismo; Teología, Institución Sacerdotal.","Administración de Empresas, Contabilidad, Auditoría, Ventas,  Marketing Estratégico, Gestión y  Negocios Internacionales, Gestión Empresarial, Gestión Financiera,  Ingeniería Comercial, Comercio Exterior, Banca y Finanzas, Gestión de Recursos Humanos, Comunicaciones Integradas en  Marketing, Administración de Empresas Ecoturísticas y de Hospitalidad, Ciencias Económicas y Financieras, Administración y Ciencias Políticas, Ciencias Empresariales, Comercio Electrónico, Emprendedores, Gestión de Organismos Públicos (Municipios, Ministerios, etc.), Gestión de Centros Educativos.","Ingeniería en Sistemas Computacionales,  Geología, Ingeniería Civil, Arquitectura, Electrónica, Telemática, Telecomunicaciones, Ingeniería Mecatrónica  (Robótica), Imagen y Sonido,  Minas, Petróleo y Metalurgia,  Ingeniería Mecánica, Ingeniería Industrial, Física, Matemáticas Aplicadas, Ingeniería en Estadística, Ingeniería Automotriz, Biotecnología Ambiental, Ingeniería Geográfica, Carreras militares (marina, aviación, ejército), Ingeniería en Costas y Obras Portuarias, Estadística Informática, Programación y Desarrollo de Sistemas, Tecnología en Informática Educativa, Astronomía, Ingeniería en ciencias geográficas y desarrollo sustentable ","Biología, Bioquímica, Farmacia, Biología Marina, Bioanálisis, Biotecnología, Ciencias Ambientales,  Zootecnia, Veterinaria, Nutrición y Estética, Cosmetología,  Dietética y Estética, Medicina, Obstetricia, Urgencias Médicas, Odontología, Enfermería, Tecnología, Oceanografía y Ciencias Ambientales, Médica, Agronomía, Horticultura y Fruticultura, Ingeniería de Alimentos, Gastronomía, Chef, Cultura Física, Deportes y Rehabilitación, Gestión Ambiental, Ingeniería Ambiental, Optometría, Homeopatía, Reflexología."]}');
+module.exports = JSON.parse('{"questions":[{"id":1,"description":"Diseñar programas de computación y explorar nuevas aplicaciones tecnológicas para uso del internet."},{"id":2,"description":"Criar, cuidar y tratar animales domésticos y de campo"},{"id":3,"description":"Investigar sobre áreas verdes, medio ambiente y cambios climáticos"},{"id":4,"description":"Ilustrar, dibujar y animar digitalmente."},{"id":5,"description":"Seleccionar, capacitar y motivar al personal de una organización/empresa"},{"id":6,"description":"Realizar excavaciones para descubrir restos del pasado"},{"id":7,"description":"Resolver problemas de cálculo para construir edificaciones."},{"id":8,"description":"Diseñar cursos para enseñar a la gente sobre temas de salud e higiene"},{"id":9,"description":"Tocar un instrumento, componer música y formar parte de un conjunto musical u orquesta."},{"id":10,"description":"Planificar cuales son las metas de una organización pública o privada a mediano y largo plazo."},{"id":11,"description":"Diseñar y planificar la producción masiva de artículos como muebles, autos, equipos de oficina, empaques y envases para alimentos y otros."},{"id":12,"description":"Diseñar logotipos y portadas de una revista"},{"id":13,"description":"Organizar eventos y atender a sus asistentes."},{"id":14,"description":"Atender la salud de personas enfermas."},{"id":15,"description":"Controlar ingresos y egresos de fondos y presentar el balance final de una institución"},{"id":16,"description":"Hacer experimentos con plantas (frutas, árboles, flores)"},{"id":17,"description":"Concebir planos para viviendas, edificios y ciudadelas."},{"id":18,"description":"Investigar y probar nuevos productos farmacéuticos."},{"id":19,"description":"Hacer propuestas y formular estrategias para aprovechar las relaciones económicas entre dos países."},{"id":20,"description":"Pintar, hacer esculturas, ilustrar libros de arte, etc."},{"id":21,"description":"Elaborar campañas para introducir un nuevo producto al mercado."},{"id":22,"description":"Examinar y tratar los problemas visuales"},{"id":23,"description":"Defender a clientes individuales o empresas en juicios de diferente naturaleza."},{"id":24,"description":"Diseñar máquinas que puedan simular actividades humanas."},{"id":25,"description":"Investigar las causas y efectos de los trastornos emocionales"},{"id":26,"description":"Supervisar las ventas de un centro comercial"},{"id":27,"description":"Atender y realizar ejercicios a personas que tienen limitaciones físicas, problemas de lenguaje, etc."},{"id":28,"description":"Prepararse para ser modelo profesional."},{"id":29,"description":"Aconsejar a las personas sobre planes de ahorro e inversiones."},{"id":30,"description":"Elaborar mapas, planos e imágenes para el estudio y análisis de datos geográficos."},{"id":31,"description":"Diseñar juegos interactivos electrónicos para computadora."},{"id":32,"description":"Realizar el control de calidad de los alimentos"},{"id":33,"description":"Tener un negocio propio de tipo comercial."},{"id":34,"description":"Analizar los fenómenos políticos y participar activamente en ellos."},{"id":35,"description":"Escribir guiones de televisión, cuentos, novelas y artículos periodísticos."},{"id":36,"description":"Organizar un plan de distribución y venta de un gran almacén."},{"id":37,"description":"Estudiar las costumbres y la forma de vida de las comunidades rurales y urbanas."},{"id":38,"description":"Gestionar y evaluar convenios internacionales de cooperación para el desarrollo social."},{"id":39,"description":"Hacer campañas publicitarias para productos y servicios"},{"id":40,"description":"Trabajar investigando la reproducción de peces, camarones y otros animales marinos."},{"id":41,"description":"Fabricar productos alimenticios de consumo masivo"},{"id":42,"description":"Gestionar y evaluar proyectos de desarrollo en una institución educativa y/o fundación."},{"id":43,"description":"Rediseñar y decorar espacios físicos en viviendas, oficinas y locales comerciales."},{"id":44,"description":"Administrar una empresa de turismo y/o agencias de viaje."},{"id":45,"description":"Aplicar métodos alternativos a la medicina tradicional para atender personas con dolencias de diversa índole."},{"id":46,"description":"Diseñar ropa para niños, jóvenes y adultos."},{"id":47,"description":"Investigar organismos vivos para elaborar vacunas."},{"id":48,"description":"Manejar y/o dar mantenimiento a dispositivos/aparatos tecnológicos en aviones, barcos, radares, etc."},{"id":49,"description":"Estudiar idiomas extranjeros actuales y antiguos- para hacer traducciones."},{"id":50,"description":"Restaurar piezas y obras de arte"},{"id":51,"description":"Revisar y dar mantenimiento a artefactos eléctricos, electrónicos y computadoras."},{"id":52,"description":"Enseñar a niños de 0 a 5 años"},{"id":53,"description":"Investigar y/o sondear nuevos mercados."},{"id":54,"description":"Atender la salud dental de las personas"},{"id":55,"description":"Tratar a niños, jóvenes y adultos con problemas psicológicos."},{"id":56,"description":"Crear estrategias de promoción y venta de nuevos productos ecuatorianos en el mercado internacional."},{"id":57,"description":"Planificar y recomendar dietas para personas diabéticas y/o con sobrepeso."},{"id":58,"description":"Trabajar en una empresa petrolera en cargos técnicos."},{"id":59,"description":"Administrar una empresa (familiar, privada o pública)"},{"id":60,"description":"Tener un taller de reparación y mantenimiento de carros, tractores, etc."},{"id":61,"description":"Ejecutar proyectos de extracción minera y metalúrgica."},{"id":62,"description":"Asistir a directivos de multinacionales con manejo de varios idiomas."},{"id":63,"description":"Diseñar programas educativos para niños con discapacidad."},{"id":64,"description":"Aplicar conocimientos de estadística en investigaciones en diversas áreas (social, administrativa, salud, etc.)"},{"id":65,"description":"Fotografiar hechos históricos, lugares significativos, rostros, paisajes y productos varios."},{"id":66,"description":"Trabajar en museos y bibliotecas nacionales e internacionales."},{"id":67,"description":"Ser parte de un grupo de teatro."},{"id":68,"description":"Producir cortometrajes, spots publicitarios, programas educativos, de ficción, etc."},{"id":69,"description":"Estudiar la influencia entre las corrientes marinas y el clima y sus consecuencias ecológicas."},{"id":70,"description":"Estudiar profundamente una religión para orientar espiritualmente a las personas que lo necesiten."},{"id":71,"description":"Asesorar a inversionistas en la compra de bienes/acciones en mercados nacionales e internacionales."},{"id":72,"description":"Participar en la creación de nuevas leyes para mejorar el país."},{"id":73,"description":"Explorar el espacio sideral, los planetas , características y componentes."},{"id":74,"description":"Mejorar la imagen facial y corporal de las personas aplicando diferentes técnicas."},{"id":75,"description":"Decorar jardines de casas y parques públicos."},{"id":76,"description":"Administrar y renovar menúes de comidas en un hotel o restaurante."},{"id":77,"description":"Trabajar como presentador de televisión, locutor de radio y televisión, animador de programas culturales y concursos."},{"id":78,"description":"Diseñar y ejecutar programas de turismo."},{"id":79,"description":"Administrar y ordenar adecuadamente la ocupación del espacio físico de ciudades, países etc., utilizando imágenes de satélite, mapas."},{"id":80,"description":"Organizar, planificar y administrar centros educativos"}],"areas":[{"id":1,"description":"ARTE Y CREATIVIDAD"},{"id":2,"description":"CIENCIAS SOCIALES"},{"id":3,"description":"ECONOMICA, ADMINISTRATIVA Y FINANCIERA"},{"id":4,"description":"CIENCIA Y TECNOLOGÍA"},{"id":5,"description":"CIENCIAS ECOLÓGICAS, BIOLÓGICAS Y DE LA SALUD"}],"carreras":[{"id":1,"description":"Diseño Gráfico, Diseño y Decoración de Interiores, Diseño de Jardines, Diseño de Modas, Diseño de Joyas, Artes Plásticas (pintura, escultura, danza, teatro, artesanía, cerámica),  Dibujo Publicitario, Restauración y museología, modelaje, fotografía, Fotografía Digital,  gestión gráfica y publicitaria, locución y publicidad, actuación, Camarografía, Arte Industrial, Producción Audiovisual y Multimedia, Comunicación y Producción en Radio y Televisión, Diseño del Paisaje,  Cine y Video, Comunicación escénica para televisión."},{"id":2,"description":"Psicología en general, Trabajo Social, Idiomas, Educación  Internacional,  Historia y Geografía, Periodismo, Periodismo Digital, Derecho, Ciencias Políticas, Sociología, Antropología, Arqueología,  Gestión Social y Desarrollo, Consejería Familiar, Comunicación y publicidad, Administración educativa, Educación Especial, Psicopedagogía, Estimulación Temprana,  Traducción Simultánea, Lingüística, Educación de Párvulos, Bibliotecología, Museología, Relaciones Internacionales y Diplomacia, Comunicación Social con mención en Marketing y Gestión de Empresas, Redacción Creativa y Publicitaria,  Relaciones Públicas y Comunicación Organizacional; Hotelería y Turismo; Teología, Institución Sacerdotal."},{"id":3,"description":"Administración de Empresas, Contabilidad, Auditoría, Ventas,  Marketing Estratégico, Gestión y  Negocios Internacionales, Gestión Empresarial, Gestión Financiera,  Ingeniería Comercial, Comercio Exterior, Banca y Finanzas, Gestión de Recursos Humanos, Comunicaciones Integradas en  Marketing, Administración de Empresas Ecoturísticas y de Hospitalidad, Ciencias Económicas y Financieras, Administración y Ciencias Políticas, Ciencias Empresariales, Comercio Electrónico, Emprendedores, Gestión de Organismos Públicos (Municipios, Ministerios, etc.), Gestión de Centros Educativos."},{"id":4,"description":"Ingeniería en Sistemas Computacionales,  Geología, Ingeniería Civil, Arquitectura, Electrónica, Telemática, Telecomunicaciones, Ingeniería Mecatrónica  (Robótica), Imagen y Sonido,  Minas, Petróleo y Metalurgia,  Ingeniería Mecánica, Ingeniería Industrial, Física, Matemáticas Aplicadas, Ingeniería en Estadística, Ingeniería Automotriz, Biotecnología Ambiental, Ingeniería Geográfica, Carreras militares (marina, aviación, ejército), Ingeniería en Costas y Obras Portuarias, Estadística Informática, Programación y Desarrollo de Sistemas, Tecnología en Informática Educativa, Astronomía, Ingeniería en ciencias geográficas y desarrollo sustentable "},{"id":5,"description":"Biología, Bioquímica, Farmacia, Biología Marina, Bioanálisis, Biotecnología, Ciencias Ambientales,  Zootecnia, Veterinaria, Nutrición y Estética, Cosmetología,  Dietética y Estética, Medicina, Obstetricia, Urgencias Médicas, Odontología, Enfermería, Tecnología, Oceanografía y Ciencias Ambientales, Médica, Agronomía, Horticultura y Fruticultura, Ingeniería de Alimentos, Gastronomía, Chef, Cultura Física, Deportes y Rehabilitación, Gestión Ambiental, Ingeniería Ambiental, Optometría, Homeopatía, Reflexología."}],"labels":{"AllQuestionsNeedToBeAnswered":"Debe responder todas las preguntas, falta: ","Activity":"Actividad"}}');
 
 /***/ }),
 
@@ -1415,7 +1599,7 @@ module.exports = JSON.parse('{"questions":["Diseñar programas de computación y
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"questions":["Desenhar programas de computação e explorar novas aplicações tecnológicas para uso da internet.","Criar, cuidar e tratar animais domésticos e de campo","Investigar sobre áreas verdes, meio ambiente e mudanças climáticas","Ilustrar, desenhar e animar digitalmente.","Selecionar, capacitar e motivar o pessoal de uma organização/empresa","Realizar escavações para descobrir restos do passado","Resolver problemas de cálculo para construir edificações.","Desenhar cursos para ensinar as pessoas sobre temas de saúde e higiene","Tocar um instrumento, compor música e fazer parte de um conjunto musical ou orquestra.","Planejar quais são as metas de uma organização pública ou privada a médio e longo prazo.","Desenhar e planejar a produção em massa de artigos como móveis, carros, equipamentos de escritório, embalagens e envases para alimentos e outros.","Desenhar logotipos e capas de uma revista","Organizar eventos e atender aos seus assistentes.","Atender a saúde de pessoas doentes.","Controlar rendimentos e despesas de fundos e apresentar o balanço final de uma instituição","Fazer experimentos com plantas (frutas, árvores, flores)","Conceber planos para residências, edifícios e cidadelas.","Investigar e testar novos produtos farmacêuticos.","Fazer propostas e formular estratégias para aproveitar as relações econômicas entre dois países.","Pintar, fazer esculturas, ilustrar livros de arte, etc.","Elaborar campanhas para introduzir um novo produto no mercado.","Examinar e tratar problemas visuais","Defender clientes individuais ou empresas em julgamentos de diferentes naturezas.","Desenhar máquinas que possam simular atividades humanas.","Investigar as causas e efeitos dos transtornos emocionais","Supervisionar as vendas de um centro comercial","Atender e realizar exercícios para pessoas com limitações físicas, problemas de linguagem, etc.","Preparar-se para ser modelo profissional.","Aconselhar as pessoas sobre planos de poupança e investimentos.","Elaborar mapas, planos e imagens para o estudo e análise de dados geográficos.","Desenhar jogos interativos eletrônicos para computador.","Realizar o controle de qualidade dos alimentos","Ter um negócio próprio de tipo comercial.","Analisar os fenômenos políticos e participar ativamente deles.","Escrever roteiros para televisão, contos, romances e artigos jornalísticos.","Organizar um plano de distribuição e venda de um grande armazém.","Estudar as costumes e a forma de vida das comunidades rurais e urbanas.","Gerenciar e avaliar acordos internacionais de cooperação para o desenvolvimento social.","Fazer campanhas publicitárias para produtos e serviços","Trabalhar investigando a reprodução de peixes, camarões e outros animais marinhos.","Fabricar produtos alimentícios de consumo em massa","Gerenciar e avaliar projetos de desenvolvimento em uma instituição educacional e/ou fundação.","Redesenhar e decorar espaços físicos em residências, escritórios e lojas comerciais.","Administrar uma empresa de turismo e/ou agências de viagem.","Aplicar métodos alternativos à medicina tradicional para atender pessoas com doenças de diversas naturezas.","Desenhar roupas para crianças, jovens e adultos.","Investigar organismos vivos para elaborar vacinas.","Manusear e/ou dar manutenção a dispositivos/aparelhos tecnológicos em aviões, navios, radares, etc.","Estudar idiomas estrangeiros - atuais e antigos- para fazer traduções.","Restaurar peças e obras de arte","Revisar e dar manutenção a artefatos elétricos, eletrônicos e computadores.","Ensinar crianças de 0 a 5 anos","Investigar e/ou sondar novos mercados.","Atender a saúde dental das pessoas","Tratar crianças, jovens e adultos com problemas psicológicos.","Criar estratégias de promoção e venda de novos produtos equatorianos no mercado internacional.","Planejar e recomendar dietas para pessoas diabéticas e/ou com sobrepeso.","Trabalhar em uma empresa petrolífera em cargos técnicos.","Administrar uma empresa (familiar, privada ou pública)","Ter um ateliê de reparação e manutenção de carros, tratores, etc.","Executar projetos de extração minera e metalúrgica.","Assistir executivos de multinacionais com manuseio de vários idiomas.","Desenhar programas educativos para crianças com deficiência.","Aplicar conhecimentos de estatística em investigações em diversas áreas (social, administrativa, saúde, etc.)","Fotografar fatos históricos, lugares significativos, rostos, paisagens e produtos variados.","Trabalhar em museus e bibliotecas nacionais e internacionais.","Fazer parte de um grupo de teatro.","Produzir curtas-metragens, spots publicitários, programas educativos, de ficção, etc.","Estudar a influência entre as correntes marinhas e o clima e suas consequências ecológicas.","Estudar profundamente uma religião para orientar espiritualmente as pessoas que precisam.","Assessorar investidores na compra de bens/ações em mercados nacionais e internacionais.","Participar na criação de novas leis para melhorar o país.","Explorar o espaço sideral, os planetas, características e componentes.","Melhorar a imagem facial e corporal das pessoas aplicando diferentes técnicas.","Decorar jardins de casas e parques públicos.","Administrar e renovar cardápios de refeições em um hotel ou restaurante.","Trabalhar como apresentador de televisão, locutor de rádio e televisão, animador de programas culturais e concursos.","Projetar e executar programas de turismo.","Administrar e organizar adequadamente a ocupação do espaço físico de cidades, países etc., usando imagens de satélite, mapas.","Organizar, planejar e administrar centros educacionais"],"areasEstudio":["ARTE E CRIATIVIDADE","CIÊNCIAS SOCIAIS","ECONÔMICA, ADMINISTRATIVA E FINANCEIRA","CIÊNCIA E TECNOLOGIA","CIÊNCIAS ECOLÓGICAS, BIOLÓGICAS E DA SAÚDE"],"carreras":["Design Gráfico, Design e Decoração de Interiores, Design de Jardins, Design de Moda, Design de Jóias, Artes Plásticas (pintura, escultura, dança, teatro, artesanato, cerâmica), Desenho Publicitário, Restauração e museologia, modelagem, fotografia, Fotografia Digital, gestão gráfica e publicitária, locução e publicidade, atuação, Camarografia, Arte Industrial, Produção Audiovisual e Multimídia, Comunicação e Produção em Rádio e Televisão, Design de Paisagem, Cinema e Vídeo, Comunicação cênica para televisão.","Psicologia em geral, Trabalho Social, Idiomas, Educação Internacional, História e Geografia, Jornalismo, Jornalismo Digital, Direito, Ciências Políticas, Sociologia, Antropologia, Arqueologia, Gestão Social e Desenvolvimento, Conselhos Familiares, Comunicação e publicidade, administração educacional, Educação Especial, Psicopedagogia, Estímulo Precoce, Tradução Simultânea, Linguística, Educação de Crianças, Biblioteconomia, Museologia, Relações Internacionais e Diplomacia, Comunicação Social com ênfase em Marketing e Gestão de Empresas, Redação Criativa e Publicitária, Relações Públicas e Comunicação Organizacional; Hotelaria e Turismo; Teologia, Instituição Sacerdotal.","Administração de Empresas, Contabilidade, Auditoria, Vendas, Marketing Estratégico, Gestão e Negócios Internacionais, Gestão Empresarial, Gestão Financeira, Engenharia Comercial, Comércio Exterior, Banca e Finanças, Gestão de Recursos Humanos, Comunicações Integradas em Marketing, Administração de Empresas Ecoturísticas e de Hospitalidade, Ciências Econômicas e Financeiras, Administração e Ciências Políticas, Ciências Empresariais, Comércio Eletrônico, Empreendedorismo, Gestão de Organismos Públicos (Municípios, Ministérios, etc.), Gestão de Centros Educacionais.","Ingeniería en Sistemas Computacionales,  Geología, Ingeniería Civil, Arquitectura, Electrónica, Telemática, Telecomunicaciones, Ingeniería Mecatrónica  (Robótica), Imagen y Sonido,  Minas, Petróleo y Metalurgia,  Ingeniería Mecánica, Ingeniería Industrial, Física, Matemáticas Aplicadas, Ingeniería en Estadística, Ingeniería Automotriz, Biotecnología Ambiental, Ingeniería Geográfica, Carreras militares (marina, aviación, ejército), Ingeniería en Costas y Obras Portuarias, Estadística Informática, Programación y Desarrollo de Sistemas, Tecnología en Informática Educativa, Astronomía, Ingeniería en ciencias geográficas y desarrollo sustentable ","Biología, Bioquímica, Farmacia, Biología Marina, Bioanálisis, Biotecnología, Ciencias Ambientales,  Zootecnia, Veterinaria, Nutrición y Estética, Cosmetología,  Dietética y Estética, Medicina, Obstetricia, Urgencias Médicas, Odontología, Enfermería, Tecnología, Oceanografía y Ciencias Ambientales, Médica, Agronomía, Horticultura y Fruticultura, Ingeniería de Alimentos, Gastronomía, Chef, Cultura Física, Deportes y Rehabilitación, Gestión Ambiental, Ingeniería Ambiental, Optometría, Homeopatía, Reflexología."]}');
+module.exports = JSON.parse('{"questions":[{"id":1,"description":"Desenhar programas de computação e explorar novas aplicações tecnológicas para uso da internet."},{"id":2,"description":"Criar, cuidar e tratar animais domésticos e de campo"},{"id":3,"description":"Investigar sobre áreas verdes, meio ambiente e mudanças climáticas"},{"id":4,"description":"Ilustrar, desenhar e animar digitalmente."},{"id":5,"description":"Selecionar, capacitar e motivar o pessoal de uma organização/empresa"},{"id":6,"description":"Realizar escavações para descobrir restos do passado"},{"id":7,"description":"Resolver problemas de cálculo para construir edificações."},{"id":8,"description":"Desenhar cursos para ensinar as pessoas sobre temas de saúde e higiene"},{"id":9,"description":"Tocar um instrumento, compor música e fazer parte de um conjunto musical ou orquestra."},{"id":10,"description":"Planejar quais são as metas de uma organização pública ou privada a médio e longo prazo."},{"id":11,"description":"Desenhar e planejar a produção em massa de artigos como móveis, carros, equipamentos de escritório, embalagens e envases para alimentos e outros."},{"id":12,"description":"Desenhar logotipos e capas de uma revista"},{"id":13,"description":"Organizar eventos e atender aos seus assistentes."},{"id":14,"description":"Atender a saúde de pessoas doentes."},{"id":15,"description":"Controlar rendimentos e despesas de fundos e apresentar o balanço final de uma instituição"},{"id":16,"description":"Fazer experimentos com plantas (frutas, árvores, flores)"},{"id":17,"description":"Conceber planos para residências, edifícios e cidadelas."},{"id":18,"description":"Investigar e testar novos produtos farmacêuticos."},{"id":19,"description":"Fazer propostas e formular estratégias para aproveitar as relações econômicas entre dois países."},{"id":20,"description":"Pintar, fazer esculturas, ilustrar livros de arte, etc."},{"id":21,"description":"Elaborar campanhas para introduzir um novo produto no mercado."},{"id":22,"description":"Examinar e tratar problemas visuais"},{"id":23,"description":"Defender clientes individuais ou empresas em julgamentos de diferentes naturezas."},{"id":24,"description":"Desenhar máquinas que possam simular atividades humanas."},{"id":25,"description":"Investigar as causas e efeitos dos transtornos emocionais"},{"id":26,"description":"Supervisionar as vendas de um centro comercial"},{"id":27,"description":"Atender e realizar exercícios para pessoas com limitações físicas, problemas de linguagem, etc."},{"id":28,"description":"Preparar-se para ser modelo profissional."},{"id":29,"description":"Aconselhar as pessoas sobre planos de poupança e investimentos."},{"id":30,"description":"Elaborar mapas, planos e imagens para o estudo e análise de dados geográficos."},{"id":31,"description":"Desenhar jogos interativos eletrônicos para computador."},{"id":32,"description":"Realizar o controle de qualidade dos alimentos"},{"id":33,"description":"Ter um negócio próprio de tipo comercial."},{"id":34,"description":"Analisar os fenômenos políticos e participar ativamente deles."},{"id":35,"description":"Escrever roteiros para televisão, contos, romances e artigos jornalísticos."},{"id":36,"description":"Organizar um plano de distribuição e venda de um grande armazém."},{"id":37,"description":"Estudar as costumes e a forma de vida das comunidades rurais e urbanas."},{"id":38,"description":"Gerenciar e avaliar acordos internacionais de cooperação para o desenvolvimento social."},{"id":39,"description":"Fazer campanhas publicitárias para produtos e serviços"},{"id":40,"description":"Trabalhar investigando a reprodução de peixes, camarões e outros animais marinhos."},{"id":41,"description":"Fabricar produtos alimentícios de consumo em massa"},{"id":42,"description":"Gerenciar e avaliar projetos de desenvolvimento em uma instituição educacional e/ou fundação."},{"id":43,"description":"Redesenhar e decorar espaços físicos em residências, escritórios e lojas comerciais."},{"id":44,"description":"Administrar uma empresa de turismo e/ou agências de viagem."},{"id":45,"description":"Aplicar métodos alternativos à medicina tradicional para atender pessoas com doenças de diversas naturezas."},{"id":46,"description":"Desenhar roupas para crianças, jovens e adultos."},{"id":47,"description":"Investigar organismos vivos para elaborar vacinas."},{"id":48,"description":"Manusear e/ou dar manutenção a dispositivos/aparelhos tecnológicos em aviões, navios, radares, etc."},{"id":49,"description":"Estudar idiomas estrangeiros - atuais e antigos- para fazer traduções."},{"id":50,"description":"Restaurar peças e obras de arte"},{"id":51,"description":"Revisar e dar manutenção a artefatos elétricos, eletrônicos e computadores."},{"id":52,"description":"Ensinar crianças de 0 a 5 anos"},{"id":53,"description":"Investigar e/ou sondar novos mercados."},{"id":54,"description":"Atender a saúde dental das pessoas"},{"id":55,"description":"Tratar crianças, jovens e adultos com problemas psicológicos."},{"id":56,"description":"Criar estratégias de promoção e venda de novos produtos equatorianos no mercado internacional."},{"id":57,"description":"Planejar e recomendar dietas para pessoas diabéticas e/ou com sobrepeso."},{"id":58,"description":"Trabalhar em uma empresa petrolífera em cargos técnicos."},{"id":59,"description":"Administrar uma empresa (familiar, privada ou pública)"},{"id":60,"description":"Ter um ateliê de reparação e manutenção de carros, tratores, etc."},{"id":61,"description":"Executar projetos de extração minera e metalúrgica."},{"id":62,"description":"Assistir executivos de multinacionais com manuseio de vários idiomas."},{"id":63,"description":"Desenhar programas educativos para crianças com deficiência."},{"id":64,"description":"Aplicar conhecimentos de estatística em investigações em diversas áreas (social, administrativa, saúde, etc.)"},{"id":65,"description":"Fotografar fatos históricos, lugares significativos, rostos, paisagens e produtos variados."},{"id":66,"description":"Trabalhar em museus e bibliotecas nacionais e internacionais."},{"id":67,"description":"Fazer parte de um grupo de teatro."},{"id":68,"description":"Produzir curtas-metragens, spots publicitários, programas educativos, de ficção, etc."},{"id":69,"description":"Estudar a influência entre as correntes marinhas e o clima e suas consequências ecológicas."},{"id":70,"description":"Estudar profundamente uma religião para orientar espiritualmente as pessoas que precisam."},{"id":71,"description":"Assessorar investidores na compra de bens/ações em mercados nacionais e internacionais."},{"id":72,"description":"Participar na criação de novas leis para melhorar o país."},{"id":73,"description":"Explorar o espaço sideral, os planetas, características e componentes."},{"id":74,"description":"Melhorar a imagem facial e corporal das pessoas aplicando diferentes técnicas."},{"id":75,"description":"Decorar jardins de casas e parques públicos."},{"id":76,"description":"Administrar e renovar cardápios de refeições em um hotel ou restaurante."},{"id":77,"description":"Trabalhar como apresentador de televisão, locutor de rádio e televisão, animador de programas culturais e concursos."},{"id":78,"description":"Projetar e executar programas de turismo."},{"id":79,"description":"Administrar e organizar adequadamente a ocupação do espaço físico de cidades, países etc., usando imagens de satélite, mapas."},{"id":80,"description":"Organizar, planejar e administrar centros educacionais"}],"areas":[{"id":1,"description":"ARTE E CRIATIVIDADE"},{"id":2,"description":"CIÊNCIAS SOCIAIS"},{"id":3,"description":"ECONÔMICA, ADMINISTRATIVA E FINANCEIRA"},{"id":4,"description":"CIÊNCIA E TECNOLOGIA"},{"id":5,"description":"CIÊNCIAS ECOLÓGICAS, BIOLÓGICAS E DA SAÚDE"}],"carreras":[{"id":1,"description":"Design Gráfico, Design e Decoração de Interiores, Design de Jardins, Design de Moda, Design de Jóias, Artes Plásticas (pintura, escultura, dança, teatro, artesanato, cerâmica), Desenho Publicitário, Restauração e museologia, modelagem, fotografia, Fotografia Digital, gestão gráfica e publicitária, locução e publicidade, atuação, Camarografia, Arte Industrial, Produção Audiovisual e Multimídia, Comunicação e Produção em Rádio e Televisão, Design de Paisagem, Cinema e Vídeo, Comunicação cênica para televisão."},{"id":2,"description":"Psicologia em geral, Trabalho Social, Idiomas, Educação Internacional, História e Geografia, Jornalismo, Jornalismo Digital, Direito, Ciências Políticas, Sociologia, Antropologia, Arqueologia, Gestão Social e Desenvolvimento, Conselhos Familiares, Comunicação e publicidade, administração educacional, Educação Especial, Psicopedagogia, Estímulo Precoce, Tradução Simultânea, Linguística, Educação de Crianças, Biblioteconomia, Museologia, Relações Internacionais e Diplomacia, Comunicação Social com ênfase em Marketing e Gestão de Empresas, Redação Criativa e Publicitária, Relações Públicas e Comunicação Organizacional; Hotelaria e Turismo; Teologia, Instituição Sacerdotal."},{"id":3,"description":"Administração de Empresas, Contabilidade, Auditoria, Vendas, Marketing Estratégico, Gestão e Negócios Internacionais, Gestão Empresarial, Gestão Financeira, Engenharia Comercial, Comércio Exterior, Banca e Finanças, Gestão de Recursos Humanos, Comunicações Integradas em Marketing, Administração de Empresas Ecoturísticas e de Hospitalidade, Ciências Econômicas e Financeiras, Administração e Ciências Políticas, Ciências Empresariais, Comércio Eletrônico, Empreendedorismo, Gestão de Organismos Públicos (Municípios, Ministérios, etc.), Gestão de Centros Educacionais."},{"id":4,"description":"Ingeniería en Sistemas Computacionales,  Geología, Ingeniería Civil, Arquitectura, Electrónica, Telemática, Telecomunicaciones, Ingeniería Mecatrónica  (Robótica), Imagen y Sonido,  Minas, Petróleo y Metalurgia,  Ingeniería Mecánica, Ingeniería Industrial, Física, Matemáticas Aplicadas, Ingeniería en Estadística, Ingeniería Automotriz, Biotecnología Ambiental, Ingeniería Geográfica, Carreras militares (marina, aviación, ejército), Ingeniería en Costas y Obras Portuarias, Estadística Informática, Programación y Desarrollo de Sistemas, Tecnología en Informática Educativa, Astronomía, Ingeniería en ciencias geográficas y desarrollo sustentable "},{"id":5,"description":"Biología, Bioquímica, Farmacia, Biología Marina, Bioanálisis, Biotecnología, Ciencias Ambientales,  Zootecnia, Veterinaria, Nutrición y Estética, Cosmetología,  Dietética y Estética, Medicina, Obstetricia, Urgencias Médicas, Odontología, Enfermería, Tecnología, Oceanografía y Ciencias Ambientales, Médica, Agronomía, Horticultura y Fruticultura, Ingeniería de Alimentos, Gastronomía, Chef, Cultura Física, Deportes y Rehabilitación, Gestión Ambiental, Ingeniería Ambiental, Optometría, Homeopatía, Reflexología."}],"labels":{"AllQuestionsNeedToBeAnswered":"Você deve responder a todas as perguntas, faltando:","Activity":"Atividade"}}');
 
 /***/ })
 
